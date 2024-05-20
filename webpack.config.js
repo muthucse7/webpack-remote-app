@@ -1,17 +1,23 @@
-const path = require("path");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
-const { ModuleFederationPlugin } = require("webpack").container;
+// webpack.config.js
+const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { ModuleFederationPlugin } = require('webpack').container;
 
 module.exports = {
-  mode: "development",
-  entry: "./index.js",
+  mode: 'development',
+  entry: './index.js',
   output: {
-    publicPath: "http://localhost:3000/",
-    filename: "[name].js",
-    path: path.resolve(__dirname, "dist"),
+    publicPath: 'http://localhost:3000/',
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist'),
+    // Expose remote container as window.remoteApp
+    library: { type: 'var', name: 'remoteApp' }
   },
   devServer: {
     port: 3000,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
   module: {
     rules: [
@@ -19,9 +25,9 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader",
+          loader: 'babel-loader',
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"],
+            presets: ['@babel/preset-env', '@babel/preset-react'],
           },
         },
       },
@@ -29,22 +35,14 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "./index.html",
+      template: './index.html',
     }),
     new ModuleFederationPlugin({
-      name: "remoteApp",
-      library: { type: "var", name: "remoteApp" },
-      filename: "remoteEntry.js",
+      name: 'remoteApp',
+      filename: 'remoteEntry.js',
       exposes: {
-        "./remoteApp": "./App.js", // Expose your entry module
-      },
-      remotes: {
-        // Define remote modules that the host application will consume
-        remoteApp: "remoteApp@http://localhost:3000/remoteEntry.js",
+        './remoteApp': './App.js',
       },
     }),
   ],
-  resolve: {
-    extensions: [".js", ".jsx"],
-  },
 };
