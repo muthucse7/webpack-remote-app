@@ -1,4 +1,3 @@
-// webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
@@ -10,13 +9,15 @@ module.exports = {
     publicPath: 'http://localhost:3000/',
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    // Expose remote container as window.remoteApp
     library: { type: 'var', name: 'remoteApp' }
   },
   devServer: {
     port: 3000,
     headers: {
       'Access-Control-Allow-Origin': '*',
+    },
+    static: {
+      directory: path.join(__dirname, 'dist'),
     },
   },
   module: {
@@ -41,7 +42,11 @@ module.exports = {
       name: 'remoteApp',
       filename: 'remoteEntry.js',
       exposes: {
-        './remoteApp': './App.js',
+        './MyComponent': './App.js',
+      },
+      shared: {
+        react: { singleton: true, eager: true },
+        'react-dom': { singleton: true, eager: true },
       },
     }),
   ],
